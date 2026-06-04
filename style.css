@@ -62,7 +62,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Sidebar Navigation */
 .sidebar {
-  width: 320px;
+  width: 260px;
   background-color: var(--sidebar-bg);
   color: var(--text-light);
   display: flex;
@@ -405,7 +405,7 @@ h1, h2, h3, h4, h5, h6 {
   flex-grow: 1;
   flex-direction: column;
   overflow: hidden;
-  padding: 24px;
+  padding: 16px;
 }
 
 .panel.active {
@@ -452,15 +452,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .scheduler-grid {
   display: grid;
-  grid-template-columns: 100px repeat(10, minmax(100px, 1fr));
-  min-width: 100%;
+  grid-template-columns: 80px repeat(10, 1fr);
+  width: 100%;
 }
 
 .grid-header-cell {
   background-color: #f1f5f9;
   border-bottom: 2px solid var(--border-color);
   border-right: 1px solid var(--border-color);
-  padding: 16px 12px;
+  padding: 10px 4px;
   font-weight: 700;
   font-size: 0.85rem;
   text-align: center;
@@ -496,8 +496,8 @@ h1, h2, h3, h4, h5, h6 {
 .grid-cell {
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  min-height: 100px;
-  padding: 8px;
+  min-height: 70px;
+  padding: 4px;
   background-color: var(--bg-secondary);
   position: relative;
   transition: background-color var(--transition-fast);
@@ -561,7 +561,7 @@ h1, h2, h3, h4, h5, h6 {
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 4px 6px;
   height: 100%;
   display: flex;
   flex-direction: column;
