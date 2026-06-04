@@ -452,8 +452,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .scheduler-grid {
   display: grid;
-  grid-template-columns: 120px repeat(10, minmax(180px, 1fr));
-  min-width: 1200px;
+  grid-template-columns: 100px repeat(10, minmax(100px, 1fr));
+  min-width: 100%;
 }
 
 .grid-header-cell {
