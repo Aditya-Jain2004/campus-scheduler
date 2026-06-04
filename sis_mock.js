@@ -42,7 +42,6 @@ export const MOCK_COURSES = [
 
   // Basic Sciences Department (Physics / Maths / Chemistry)
   { code: "BS-101", name: "Engineering Physics", facultyId: "FAC007", sectionSize: 150, department: "Basic Sciences" },
-  { code: "BS-101-LAB", name: "Engineering Physics Lab", facultyId: "FAC007", sectionSize: 75, department: "Basic Sciences" },
   { code: "BS-102-S1", name: "Calculus & Linear Algebra (Sec A)", facultyId: "FAC008", sectionSize: 80, department: "Basic Sciences" },
   { code: "BS-102-S2", name: "Calculus & Linear Algebra (Sec B)", facultyId: "FAC008", sectionSize: 80, department: "Basic Sciences" },
   { code: "BS-201", name: "Discrete Mathematics", facultyId: "FAC008", sectionSize: 90, department: "Basic Sciences" },
