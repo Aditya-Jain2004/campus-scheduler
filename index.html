@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusScheduler - Timetable Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Wrapper -->
+  <div class="app-container">
+
+    <!-- Sidebar Navigation & Unscheduled Courses -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">CS</div>
+          <div class="logo-text">CampusScheduler</div>
+        </div>
+        <div class="lang-selector">
+          <button id="lang-en" class="lang-btn active">English</button>
+          <button id="lang-hi" class="lang-btn">हिंदी</button>
+        </div>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 4px; width: 100%;">
+          <label for="select-user-role" style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700;" class="translate" data-en="Active Persona:" data-hi="सक्रिय भूमिका:">Active Persona:</label>
+          <select id="select-user-role" style="width: 100%; background: #1e293b; color: white; border: 1px solid #475569; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; outline: none;">
+            <option value="registrar" class="translate" data-en="Registrar (Admin)" data-hi="रजिस्ट्रार (एडमिन)">Registrar (Admin)</option>
+            <option value="FAC001" class="translate" data-en="Dr. Rajesh Sharma (CS)" data-hi="डॉ. राजेश शर्मा (CS)">Dr. Rajesh Sharma (CS)</option>
+            <option value="FAC008" class="translate" data-en="Dr. Kavita Joshi (Sci)" data-hi="डॉ. कविता जोशी (Sci)">Dr. Kavita Joshi (Sci)</option>
+            <option value="FAC003" class="translate" data-en="Dr. Amit Verma (EC)" data-hi="डॉ. अमित वर्मा (EC)">Dr. Amit Verma (EC)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-menu">
+        <div class="nav-item active" data-target="timetable-panel">
+          <span class="nav-icon">📅</span>
+          <span class="translate" data-en="Timetable Builder" data-hi="समय-सारणी निर्माता">Timetable Builder</span>
+        </div>
+        <div class="nav-item" data-target="rooms-panel">
+          <span class="nav-icon">🏫</span>
+          <span class="translate" data-en="Room Master" data-hi="कक्ष प्रबंधन">Room Master</span>
+        </div>
+        <div class="nav-item" data-target="availability-panel">
+          <span class="nav-icon">🔍</span>
+          <span class="translate" data-en="Room Availability" data-hi="कक्ष उपलब्धता">Room Availability</span>
+        </div>
+        <div class="nav-item" data-target="publish-panel">
+          <span class="nav-icon">📢</span>
+          <span class="translate" data-en="Publish & Reports" data-hi="प्रकाशन और रिपोर्ट">Publish & Reports</span>
+        </div>
+        <div class="nav-item" data-target="requests-panel" id="nav-reschedule-requests">
+          <span class="nav-icon">📩</span>
+          <span class="translate" data-en="Reschedule Requests" data-hi="अनुसूची अनुरोध">Reschedule Requests</span>
+        </div>
+
+      </nav>
+
+      <!-- Sidebar Scroll Area -->
+      <div class="sidebar-content-scroll">
+        <!-- Panel-dependent sidebar content -->
+        <div id="timetable-sidebar-content">
+          <div class="sidebar-section-title translate" data-en="Unscheduled Courses" data-hi="अनिर्धारित पाठ्यक्रम">Unscheduled Courses</div>
+          <div id="unscheduled-courses" class="course-list-container">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+        
+        <div id="other-sidebar-content" style="display: none;">
+          <div class="sidebar-section-title translate" data-en="Quick Information" data-hi="त्वरित जानकारी">Quick Information</div>
+          <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.6;" class="translate" 
+             data-en="Use CampusScheduler to build conflicts-free and capacity-aligned timetables." 
+             data-hi="संघर्ष-मुक्त और क्षमता-संरेखित समय-सारणी बनाने के लिए CampusScheduler का उपयोग करें।">
+            Use CampusScheduler to build conflicts-free and capacity-aligned timetables.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Published Alert Banner -->
+      <div id="published-banner" class="published-banner" style="display: none;">
+        <div class="published-banner-text">
+          <span class="published-badge translate" data-en="PUBLISHED" data-hi="प्रकाशित">PUBLISHED</span>
+          <span class="translate" 
+                data-en="Timetable is now published and read-only. Unpublish to make changes." 
+                data-hi="समय-सारणी अब प्रकाशित और केवल-पठनीय है। बदलाव करने के लिए अप्रकाशित करें।">
+            Timetable is now published and read-only. Unpublish to make changes.
+          </span>
+        </div>
+        <button id="btn-unpublish-banner" class="btn btn-secondary translate" data-en="Unpublish" data-hi="अप्रकाशित करें">Unpublish</button>
+      </div>
+
+      <!-- Top Dashboard Header -->
+      <header class="top-bar">
+        <div class="top-bar-title">
+          <h2 id="page-title" class="translate" data-en="Semester Timetable Builder" data-hi="सत्र समय-सारणी निर्माता">Semester Timetable Builder</h2>
+          <span id="page-subtitle" class="top-bar-subtitle translate" data-en="Build conflict-free timetables for the semester" data-hi="सत्र के लिए संघर्ष-मुक्त समय-सारणी का निर्माण करें">Build conflict-free timetables for the semester</span>
+        </div>
+
+        <div class="top-bar-actions">
+          <button id="btn-export-pdf" class="btn btn-secondary">
+            <span>🖨️</span> <span class="translate" data-en="Print / PDF" data-hi="प्रिंट / पीडीएफ">Print / PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Workspace Panels Container -->
+      <div class="main-content">
+
+        <!-- PANEL 1: Timetable Builder Grid -->
+        <section id="timetable-panel" class="panel active">
+          <div class="timetable-workspace">
+            <!-- Grid Filter & Selectors -->
+            <div class="filter-bar">
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Select Room:" data-hi="कक्ष चुनें:">Select Room:</span>
+                <select id="select-active-room" class="select-input">
+                  <!-- Populated via Javascript -->
+                </select>
+              </div>
+
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Target Date:" data-hi="लक्षित तिथि:">Target Date:</span>
+                <input type="date" id="select-grid-date" class="select-input" style="padding: 6px 10px; font-size: 0.8rem; width: 140px;" min="2026-07-20" max="2026-11-30" placeholder="Semester View">
+              </div>
+
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Building:" data-hi="भवन:">Building:</span>
+                <select id="select-filter-building" class="select-input">
+                  <option value="all" class="translate" data-en="All Buildings" data-hi="सभी भवन">All Buildings</option>
+                  <!-- Populated via Javascript -->
+                </select>
+              </div>
+
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Room Type:" data-hi="कक्ष का प्रकार:">Room Type:</span>
+                <select id="select-filter-type" class="select-input">
+                  <option value="all" class="translate" data-en="All Types" data-hi="सभी प्रकार">All Types</option>
+                  <option value="Lecture Hall" class="translate" data-en="Lecture Hall" data-hi="व्याख्यान कक्ष">Lecture Hall</option>
+                  <option value="Seminar Room" class="translate" data-en="Seminar Room" data-hi="संगोष्ठी कक्ष">Seminar Room</option>
+                  <option value="Lab" class="translate" data-en="Lab" data-hi="प्रयोगशाला">Lab</option>
+                </select>
+              </div>
+
+              <button id="btn-trigger-auto-schedule" class="btn btn-primary translate" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);" data-en="Auto-Schedule ⚡" data-hi="स्वचालित-अनुसूची ⚡">Auto-Schedule ⚡</button>
+              <button id="btn-reset-timetable" class="btn btn-danger translate" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); margin-left: 8px;" data-en="Reset Timetable 🛑" data-hi="समय-सारणी रीसेट करें 🛑">Reset Timetable 🛑</button>
+
+              <!-- Quick Info Badge for the active room -->
+              <div id="active-room-stats" style="margin-left: auto; font-size: 0.85rem; display: flex; gap: 12px; color: var(--text-secondary);">
+                <!-- Dynamic text like: Capacity: 120 | Type: Lecture Hall -->
+              </div>
+            </div>
+
+            <!-- Drag & Drop Grid Workspace -->
+            <div class="grid-wrapper">
+              <div id="timetable-grid" class="scheduler-grid">
+                <!-- Programmatically generated grid layout -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 2: Room Master Panel (CRUD + CSV) -->
+        <section id="rooms-panel" class="panel">
+          <div class="room-master-layout">
+            <!-- Left Side: Table of Rooms -->
+            <div class="rooms-list-container">
+              <div class="panel-header-actions">
+                <h3 class="translate" data-en="University Rooms List" data-hi="विश्वविद्यालय कक्ष सूची">University Rooms List</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <!-- Bulk CSV Import -->
+                  <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                  <button id="btn-trigger-csv-import" class="btn btn-secondary">
+                    <span>📤</span> <span class="translate" data-en="Bulk CSV Import" data-hi="थोक CSV आयात">Bulk CSV Import</span>
+                  </button>
+                  <button id="btn-download-sample-csv" class="btn btn-icon" title="Download Sample CSV Template">📄</button>
+                </div>
+              </div>
+
+              <div class="rooms-table-scroll">
+                <table class="rooms-table">
+                  <thead>
+                    <tr>
+                      <th class="translate" data-en="Room Name" data-hi="कक्ष का नाम">Room Name</th>
+                      <th class="translate" data-en="Building" data-hi="भवन">Building</th>
+                      <th class="translate" data-en="Capacity" data-hi="क्षमता">Capacity</th>
+                      <th class="translate" data-en="Type" data-hi="प्रकार">Type</th>
+                      <th class="translate" data-en="AV Equipment" data-hi="ऑडियो-विजुअल उपकरण">AV Equipment</th>
+                      <th class="translate" data-en="Actions" data-hi="कार्रवाई">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rooms-table-body">
+                    <!-- Populated via Javascript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Side: Room Form (Create/Edit) -->
+            <div class="room-creation-sidebar">
+              <h3 id="room-form-title" class="translate" data-en="Create New Room" data-hi="नया कक्ष बनाएँ">Create New Room</h3>
+              <form id="room-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="room-form-edit-id">
+                
+                <div class="form-group">
+                  <label for="room-name" class="translate" data-en="Room Name" data-hi="कक्ष का नाम">Room Name</label>
+                  <input type="text" id="room-name" placeholder="e.g. LHC-101" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="room-building" class="translate" data-en="Building / Floor" data-hi="भवन / मंजिल">Building / Floor</label>
+                  <input type="text" id="room-building" placeholder="e.g. Lecture Hall Complex" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="room-capacity" class="translate" data-en="Capacity (Students)" data-hi="क्षमता (छात्र)">Capacity (Students)</label>
+                  <input type="number" id="room-capacity" min="5" placeholder="e.g. 120" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="room-type" class="translate" data-en="Room Type" data-hi="कक्ष का प्रकार">Room Type</label>
+                  <select id="room-type" class="select-input">
+                    <option value="Lecture Hall" class="translate" data-en="Lecture Hall" data-hi="व्याख्यान कक्ष">Lecture Hall</option>
+                    <option value="Seminar Room" class="translate" data-en="Seminar Room" data-hi="संगोष्ठी कक्ष">Seminar Room</option>
+                    <option value="Lab" class="translate" data-en="Lab" data-hi="प्रयोगशाला">Lab</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="translate" data-en="AV Equipment / Features" data-hi="ऑडियो-विजुअल उपकरण / विशेषताएँ">AV Equipment / Features</label>
+                  <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="Projector"> Projector</label>
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="Microphone"> Mic</label>
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="AC"> AC</label>
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="Smartboard"> Smartboard</label>
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="Whiteboard"> Whiteboard</label>
+                    <label class="checkbox-label"><input type="checkbox" name="av-equip" value="Computers"> Computers</label>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                  <button type="submit" id="btn-save-room" class="btn btn-primary translate" style="flex-grow: 1;" data-en="Save Room" data-hi="कक्ष सहेजें">Save Room</button>
+                  <button type="button" id="btn-cancel-room-form" class="btn btn-secondary translate" style="display: none;" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 3: Room Availability Matrix -->
+        <section id="availability-panel" class="panel">
+          <div class="availability-grid-container">
+            <div class="filter-bar">
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Select Day:" data-hi="दिन चुनें:">Select Day:</span>
+                <select id="matrix-day-select" class="select-input">
+                  <option value="Monday" class="translate" data-en="Monday" data-hi="सोमवार">Monday</option>
+                  <option value="Tuesday" class="translate" data-en="Tuesday" data-hi="मंगलवार">Tuesday</option>
+                  <option value="Wednesday" class="translate" data-en="Wednesday" data-hi="बुधवार">Wednesday</option>
+                  <option value="Thursday" class="translate" data-en="Thursday" data-hi="गुरुवार">Thursday</option>
+                  <option value="Friday" class="translate" data-en="Friday" data-hi="शुक्रवार">Friday</option>
+                  <option value="Saturday" class="translate" data-en="Saturday" data-hi="शनिवार">Saturday</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Min Capacity:" data-hi="न्यूनतम क्षमता:">Min Capacity:</span>
+                <input type="number" id="matrix-capacity-filter" class="select-input" style="width: 100px; padding: 6px 12px;" min="0" placeholder="e.g. 50">
+              </div>
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Building:" data-hi="भवन:">Building:</span>
+                <select id="matrix-building-select" class="select-input">
+                  <option value="all" class="translate" data-en="All Buildings" data-hi="सभी भवन">All Buildings</option>
+                  <!-- Populated via Javascript -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Matrix Spreadsheet-style table view -->
+            <div class="matrix-table-scroll">
+              <table class="matrix-table">
+                <thead>
+                  <tr id="matrix-table-header">
+                    <!-- Dynamic Headers: Room \ Time Slots -->
+                  </tr>
+                </thead>
+                <tbody id="matrix-table-body">
+                  <!-- Populated via Javascript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 4: Publish & Dynamic Reports -->
+        <section id="publish-panel" class="panel">
+          <div class="timetable-workspace">
+            <div class="filter-bar">
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Schedule Type:" data-hi="समय-सारणी प्रकार:">Schedule Type:</span>
+                <select id="report-type-select" class="select-input">
+                  <option value="room" class="translate" data-en="Room-wise Schedule" data-hi="कक्ष-वार समय-सारणी">Room-wise Schedule</option>
+                  <option value="faculty" class="translate" data-en="Faculty-wise Schedule" data-hi="संकाय-वार समय-सारणी">Faculty-wise Schedule</option>
+                  <option value="department" class="translate" data-en="Department-wise Schedule" data-hi="विभाग-वार समय-सारणी">Department-wise Schedule</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                <span class="filter-label translate" data-en="Select Target:" data-hi="लक्ष्य चुनें:">Select Target:</span>
+                <select id="report-target-select" class="select-input" style="min-width: 200px;">
+                  <!-- Populated dynamically via JS -->
+                </select>
+              </div>
+
+              <!-- Publish status toggle inside panel -->
+              <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+                <span class="filter-label translate" data-en="Status:" data-hi="स्थिति:">Status:</span>
+                <span id="publish-status-badge" class="room-status-badge badge-maintenance translate" data-en="Draft / संपादन" data-hi="प्रारूप / संपादन">Draft / Editing</span>
+                <button id="btn-panel-toggle-publish" class="btn btn-primary translate" data-en="Publish Semester" data-hi="सेमेस्टर प्रकाशित करें">Publish Semester</button>
+              </div>
+            </div>
+
+            <!-- Read-only View Grid -->
+            <div class="grid-wrapper">
+              <div id="publish-view-grid" class="scheduler-grid">
+                <!-- Populated via Javascript -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 5: Reschedule Requests Panel -->
+        <section id="requests-panel" class="panel">
+          <div class="rooms-list-container" style="flex-grow: 1;">
+            <div class="panel-header-actions">
+              <h3 class="translate" data-en="Class Reschedule Requests" data-hi="कक्षा पुनर्निर्धारण अनुरोध">Class Reschedule Requests</h3>
+              <button id="btn-open-request-modal" class="btn btn-primary translate" style="display: none;" data-en="Submit Reschedule Request 📩" data-hi="पुनर्निर्धारण अनुरोध भेजें 📩">Submit Reschedule Request 📩</button>
+            </div>
+
+            <div class="rooms-table-scroll">
+              <table class="rooms-table">
+                <thead>
+                  <tr>
+                    <th class="translate" data-en="Ticket ID" data-hi="टिकट आईडी">Ticket ID</th>
+                    <th class="translate" data-en="Course" data-hi="पाठ्यक्रम">Course</th>
+                    <th class="translate" data-en="Faculty" data-hi="संकाय">Faculty</th>
+                    <th class="translate" data-en="Original Slot" data-hi="मूल स्लॉट">Original Slot</th>
+                    <th class="translate" data-en="Requested Slot" data-hi="अनुरोधित स्लॉट">Requested Slot</th>
+                    <th class="translate" data-en="Type" data-hi="प्रकार">Type</th>
+                    <th class="translate" data-en="Reason" data-hi="कारण">Reason</th>
+                    <th class="translate" data-en="Status" data-hi="स्थिति">Status</th>
+                    <th class="translate" data-en="Actions" data-hi="कार्रवाई">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="requests-table-body">
+                  <!-- Populated via Javascript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+
+      </div>
+    </main>
+  </div>
+
+  <!-- TOAST ALERTS CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- DIALOG: Mark Room Unavailable -->
+  <dialog id="dialog-room-unavailability">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h3 class="dialog-title translate" data-en="Schedule Room Unavailability" data-hi="कक्ष अनुपलब्धता निर्धारित करें">Schedule Room Unavailability</h3>
+        <button class="dialog-close" commandfor="dialog-room-unavailability" command="close">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);" class="translate" 
+         data-en="Mark a room unavailable for maintenance, exams, or university events for a specific day and time range." 
+         data-hi="किसी विशिष्ट दिन और समय सीमा के लिए रखरखाव, परीक्षा या विश्वविद्यालय के कार्यक्रमों के लिए कक्ष को अनुपलब्ध के रूप में चिह्नित करें।">
+        Mark a room unavailable for maintenance, exams, or university events for a specific day and time range.
+      </p>
+      <form id="form-room-unavailability" style="display: flex; flex-direction: column; gap: 16px;">
+        <input type="hidden" id="unavailability-room-id">
+        <div class="form-group">
+          <label class="translate" data-en="Selected Room" data-hi="चयनित कक्ष">Selected Room</label>
+          <input type="text" id="unavailability-room-name-display" readonly style="background-color: var(--bg-primary);">
+        </div>
+        <div class="form-group">
+          <label for="unavailability-day" class="translate" data-en="Day of Week" data-hi="सप्ताह का दिन">Day of Week</label>
+          <select id="unavailability-day" class="select-input">
+            <option value="Monday" class="translate" data-en="Monday" data-hi="सोमवार">Monday</option>
+            <option value="Tuesday" class="translate" data-en="Tuesday" data-hi="मंगलवार">Tuesday</option>
+            <option value="Wednesday" class="translate" data-en="Wednesday" data-hi="बुधवार">Wednesday</option>
+            <option value="Thursday" class="translate" data-en="Thursday" data-hi="गुरुवार">Thursday</option>
+            <option value="Friday" class="translate" data-en="Friday" data-hi="शुक्रवार">Friday</option>
+            <option value="Saturday" class="translate" data-en="Saturday" data-hi="शनिवार">Saturday</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="unavailability-slot" class="translate" data-en="Select Time Slot" data-hi="समय स्लॉट चुनें">Select Time Slot</label>
+          <select id="unavailability-slot" class="select-input">
+            <!-- Populated via Javascript -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="unavailability-reason" class="translate" data-en="Reason (Optional)" data-hi="कारण (वैकल्पिक)">Reason (Optional)</label>
+          <input type="text" id="unavailability-reason" placeholder="e.g. Maintenance, AC repair">
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary translate" commandfor="dialog-room-unavailability" command="close" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+          <button type="submit" class="btn btn-primary translate" data-en="Save Restriction" data-hi="प्रतिबंध सहेजें">Save Restriction</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Auto-Generate Timetable Options -->
+  <dialog id="dialog-auto-generate">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h3 class="dialog-title translate" data-en="Auto-Schedule Timetable" data-hi="समय-सारणी स्वचालित रूप से बनाएं">Auto-Schedule Timetable</h3>
+        <button class="dialog-close" commandfor="dialog-auto-generate" command="close">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;" class="translate" 
+         data-en="The auto-scheduler will automatically allocate unscheduled courses to classrooms while satisfying all capacity, room type, and faculty clash constraints." 
+         data-hi="स्वचालित-अनुसूचक क्षमता, कक्ष प्रकार और संकाय संघर्ष के सभी प्रतिबंधों को संतुष्ट करते हुए स्वचालित रूप से कक्षाओं को अनिर्धारित पाठ्यक्रम आवंटित करेगा।">
+        The auto-scheduler will automatically allocate unscheduled courses to classrooms while satisfying all capacity, room type, and faculty clash constraints.
+      </p>
+      
+      <div style="background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; font-size: 0.8rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+        <span class="translate" data-en="⚙️ Constraints Enforced:" data-hi="⚙️ लागू प्रतिबंध:">⚙️ Constraints Enforced:</span>
+        <span class="translate" data-en="• Room Seating Capacity >= Course Section Size" data-hi="• कक्ष बैठने की क्षमता >= पाठ्यक्रम अनुभाग आकार">• Room Seating Capacity >= Course Section Size</span>
+        <span class="translate" data-en="• Faculty Clash Free (no double teaching)" data-hi="• संकाय संघर्ष मुक्त (कोई दोहरा शिक्षण नहीं)">• Faculty Clash Free (no double teaching)</span>
+        <span class="translate" data-en="• Room Type Match (e.g. Lab courses to Lab rooms)" data-hi="• कक्ष प्रकार मिलान (जैसे लैब के लिए लैब कक्ष)">• Room Type Match (e.g. Lab courses to Lab rooms)</span>
+        <span class="translate" data-en="• Holidays and Unavailability Blocks Skipped" data-hi="• शैक्षणिक अवकाश और रखरखाव ब्लॉक छोड़े गए">• Holidays and Unavailability Blocks Skipped</span>
+      </div>
+
+      <div class="dialog-footer" style="flex-direction: column; gap: 8px; align-items: stretch; margin-top: 10px;">
+        <button id="btn-auto-schedule-scratch" class="btn btn-danger translate" style="justify-content: center;" data-en="Clear All & Schedule From Scratch" data-hi="सभी साफ़ करें और शुरू से निर्धारित करें">Clear All & Schedule From Scratch</button>
+        <button id="btn-auto-schedule-remaining" class="btn btn-primary translate" style="justify-content: center;" data-en="Schedule Only Remaining Courses" data-hi="केवल शेष पाठ्यक्रमों को निर्धारित करें">Schedule Only Remaining Courses</button>
+        <button type="button" class="btn btn-secondary translate" commandfor="dialog-auto-generate" command="close" style="justify-content: center;" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Faculty Reschedule Request Modal -->
+  <dialog id="dialog-reschedule-request">
+    <div class="dialog-content" style="max-width: 550px;">
+      <div class="dialog-header">
+        <h3 class="dialog-title translate" data-en="Submit Reschedule Request" data-hi="पुनर्निर्धारण अनुरोध सबमिट करें">Submit Reschedule Request</h3>
+        <button class="dialog-close" commandfor="dialog-reschedule-request" command="close">&times;</button>
+      </div>
+      
+      <form id="form-reschedule-request" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label for="request-course-select" class="translate" data-en="Select Course" data-hi="पाठ्यक्रम चुनें">Select Course</label>
+          <select id="request-course-select" class="select-input" required>
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="translate" data-en="Current Schedule" data-hi="वर्तमान अनुसूची">Current Schedule</label>
+          <input type="text" id="request-current-slot-display" readonly style="background-color: var(--bg-primary);">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="request-day-select" class="translate" data-en="Requested Day" data-hi="अनुरोधित दिन">Requested Day</label>
+            <select id="request-day-select" class="select-input">
+              <option value="Monday" class="translate" data-en="Monday" data-hi="सोमवार">Monday</option>
+              <option value="Tuesday" class="translate" data-en="Tuesday" data-hi="मंगलवार">Tuesday</option>
+              <option value="Wednesday" class="translate" data-en="Wednesday" data-hi="बुधवार">Wednesday</option>
+              <option value="Thursday" class="translate" data-en="Thursday" data-hi="गुरुवार">Thursday</option>
+              <option value="Friday" class="translate" data-en="Friday" data-hi="शुक्रवार">Friday</option>
+              <option value="Saturday" class="translate" data-en="Saturday" data-hi="शनिवार">Saturday</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-slot-select" class="translate" data-en="Requested Time Slot" data-hi="अनुरोधित समय स्लॉट">Requested Time Slot</label>
+            <select id="request-slot-select" class="select-input">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="request-room-select" class="translate" data-en="Requested Room" data-hi="अनुरोधित कक्ष">Requested Room</label>
+          <select id="request-room-select" class="select-input" required>
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; align-items: end;">
+          <div class="form-group">
+            <label for="request-type-select" class="translate" data-en="Reschedule Type" data-hi="पुनर्निर्धारण का प्रकार">Reschedule Type</label>
+            <select id="request-type-select" class="select-input">
+              <option value="semester" class="translate" data-en="Entire Semester (Permanent)" data-hi="पूरे सेमेस्टर के लिए (स्थायी)">Entire Semester (Permanent)</option>
+              <option value="lecture" class="translate" data-en="Single Class (One-Off Override)" data-hi="एकल व्याख्यान (केवल एक दिन)">Single Class (One-Off Override)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="request-date-group" style="display: none;">
+            <label for="request-date-input" class="translate" data-en="Specific Date" data-hi="विशिष्ट तिथि">Specific Date</label>
+            <input type="date" id="request-date-input" class="select-input" min="2026-07-20" max="2026-11-30">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="request-reason-input" class="translate" data-en="Reason for Change" data-hi="परिवर्तन का कारण">Reason for Change</label>
+          <input type="text" id="request-reason-input" placeholder="e.g. Conference, Medical checkup" required>
+        </div>
+
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary translate" commandfor="dialog-reschedule-request" command="close" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+          <button type="submit" class="btn btn-primary translate" data-en="Submit Request" data-hi="अनुरोध भेजें">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- JS Scripts -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

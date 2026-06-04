@@ -1,0 +1,17 @@
+name,building,capacity,type,av_equipment
+CS-LH101,Computer Science Block,120,Lecture Hall,Projector;Microphone;AC;Whiteboard
+CS-LH102,Computer Science Block,100,Lecture Hall,Projector;AC;Whiteboard
+CS-LAB101,Computer Science Block,80,Lab,Projector;AC;Computers;Whiteboard
+ME-LH101,Mechanical Block,150,Lecture Hall,Projector;Microphone;AC;Whiteboard
+ME-LH102,Mechanical Block,100,Lecture Hall,Projector;Whiteboard
+ME-LAB101,Mechanical Block,100,Lab,Heavy Machines;Tools;Whiteboard
+BS-LH101,Basic Sciences Block,150,Lecture Hall,Projector;Microphone;AC;Whiteboard
+BS-LH102,Basic Sciences Block,100,Lecture Hall,Projector;Whiteboard
+BS-LAB101,Basic Sciences Block,60,Lab,Projector;AC;Whiteboard
+EC-LH101,Electronics Block,120,Lecture Hall,Projector;Microphone;AC;Whiteboard
+EC-LH102,Electronics Block,100,Lecture Hall,Projector;Whiteboard
+EC-LAB101,Electronics Block,80,Lab,AC;Oscilloscopes;Power Supplies;Whiteboard
+HU-LH101,Humanities Block,150,Lecture Hall,Projector;Microphone;AC;Whiteboard
+HU-LH102,Humanities Block,120,Lecture Hall,Projector;Whiteboard
+HU-LAB101,Humanities Block,40,Lab,Projector;Whiteboard
+MAIN-AUD,Main Building,200,Lecture Hall,Projector;Microphone;Sound System;AC
